@@ -20,7 +20,7 @@ def run_loliland_bonus_script(username: str, password: str):
     options.headless = True  # ОБЯЗАТЕЛЬНО True для хостинга! 
     options.page_load_strategy = 'eager'
     # Дополнительные опции для работы в Linux/Docker на хостинге:
-    options.add_argument('--no-sandbox')
+    # options.add_argument('--no-sandbox')
     options.add_argument('--disable-dev-shm-usage')
     options.add_argument('--disable-gpu')
     options.add_argument('--window-size=1920x1080') # Иногда помогает
@@ -28,8 +28,8 @@ def run_loliland_bonus_script(username: str, password: str):
     driver = None # Инициализируем driver как None
     try:
         # Используйте uc.find_chrome_executable() если chromedriver не в PATH
-        driver = uc.Chrome(options=options, driver_executable_path=uc.find_chrome_executable())
-        # driver = uc.Chrome(options=options)
+        # driver = uc.Chrome(options=options, driver_executable_path=uc.find_chrome_executable())
+        driver = uc.Chrome(options=options)
         logger.info("Драйвер запущен.")
 
         logger.info("Получаю страницу loliland.ru (eager strategy)")
