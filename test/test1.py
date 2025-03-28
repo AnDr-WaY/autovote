@@ -39,8 +39,10 @@ def run_loliland_bonus_script(username: str, password: str, cptchaapikey: str):
         logger.info("Обнаружена reCAPTCHA v3. Попытка решения через 2Captcha...")
         try:
             solver = TwoCaptcha(cptchaapikey)
-            result = solver.recaptcha(sitekey=sitekey, url=page_url, version='v3', action='login') # action='login' - пример, уточните action если нужно
+            result = solver.recaptcha(sitekey=sitekey, url=page_url, version='v3', minScore=0.9) # action='login' - пример, уточните action если нужно
             captcha_response = result['code']
+            logger.info(captcha_response)
+            
             logger.info("ReCAPTCHA v3 успешно решена через 2Captcha.")
             return captcha_response
         except Exception as e:
@@ -72,12 +74,12 @@ def run_loliland_bonus_script(username: str, password: str, cptchaapikey: str):
         driver.get("https://loliland.ru/")
 
         wait = WebDriverWait(driver, 15) 
-        time.sleep(4)
+        time.sleep(10)
         logger.info("Ищу поле логина")
         login_field = wait.until(EC.presence_of_element_located((By.XPATH, "//input[@placeholder='Логин']")))
         actions.move_to_element(login_field)
         login_field.send_keys(username) 
-        time.sleep(2)
+        time.sleep(3)
         logger.info("Ищу поле пароля")
         password_field = wait.until(EC.presence_of_element_located((By.XPATH, "//input[@placeholder='Пароль']")))
         
@@ -100,7 +102,7 @@ def run_loliland_bonus_script(username: str, password: str, cptchaapikey: str):
                 logger.info("Токен reCAPTCHA v3 получен. Предполагается автоматическая отправка токена.")
                 # Если нужно явно вставить токен (что для v3 обычно не требуется), код для вставки токена здесь.
                 # Например, если нужно вставить в скрытое поле:
-                driver.execute_script(f"document.getElementById('g-recaptcha-response').value='{recaptcha_response}';")
+                driver.execute_script(f"document.getElementById('g-recaptcha-response-100000').value='{recaptcha_response}';")
             else:
                 logger.warning("Не удалось решить reCAPTCHA v3 через 2Captcha. Возможно, продолжение без решения.")
         except Exception as e_captcha_check:
