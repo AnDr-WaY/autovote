@@ -1,4 +1,5 @@
 import undetected_chromedriver as uc
+from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -46,6 +47,7 @@ def run_loliland_bonus_script(username: str, password: str):
         # Используйте uc.find_chrome_executable() если chromedriver не в PATH
         # driver = uc.Chrome(options=options, driver_executable_path=uc.find_chrome_executable())
         driver = uc.Chrome(options=options)
+        actions = ActionChains(driver, duration=1301)
         logger.info("Драйвер запущен.")
 
         logger.info("Получаю страницу loliland.ru (eager strategy)")
@@ -55,15 +57,18 @@ def run_loliland_bonus_script(username: str, password: str):
         time.sleep(4)
         logger.info("Ищу поле логина")
         login_field = wait.until(EC.presence_of_element_located((By.XPATH, "//input[@placeholder='Логин']")))
+        actions.move_to_element(login_field)
         login_field.send_keys(username) 
         time.sleep(2)
         logger.info("Ищу поле пароля")
         password_field = wait.until(EC.presence_of_element_located((By.XPATH, "//input[@placeholder='Пароль']")))
+        
+        actions.move_to_element(password_field)
         password_field.send_keys(password) 
-        time.sleep(1)
+        time.sleep(3)
 
         # --- Логика повторных попыток входа ---
-        max_retries = 5
+        max_retries = 3
         retry_count = 0
         login_successful = False
         element_after_login = None
@@ -76,7 +81,8 @@ def run_loliland_bonus_script(username: str, password: str):
                 login_button = WebDriverWait(driver, 10).until(
                     EC.element_to_be_clickable((By.XPATH, login_button_xpath))
                 )
-                login_button.click()
+                actions.move_to_element(login_button)
+                actions.click(login_button)
                 logger.info("Кнопка 'Войти' нажата.")
                 time.sleep(1)
                 take_screenshot(driver, f"login_attempt_{retry_count + 1}") # Делаем скриншот после нажатия кнопки
@@ -148,14 +154,14 @@ def run_loliland_bonus_script(username: str, password: str):
             # Если цикл завершился без успеха
             logger.error("Не удалось войти на сайт после всех попыток. Пропускаю получение бонуса.")
             # Сохраняем скриншот финальной неудачи входа
-            if driver:
-                 try:
-                    timestamp = time.strftime("%Y%m%d-%H%M%S")
-                    filename = f"login_failure_screenshot_{timestamp}.png"
-                    driver.save_screenshot(filename)
-                    logger.info(f"Скриншот ошибки входа сохранен как {filename}")
-                 except Exception as screenshot_error:
-                    logger.error(f"Не удалось сохранить скриншот ошибки входа: {screenshot_error}")
+            # if driver:
+            #      try:
+            #         timestamp = time.strftime("%Y%m%d-%H%M%S")
+            #         filename = f"login_failure_screenshot_{timestamp}.png"
+            #         driver.save_screenshot(filename)
+            #         logger.info(f"Скриншот ошибки входа сохранен как {filename}")
+            #      except Exception as screenshot_error:
+            #         logger.error(f"Не удалось сохранить скриншот ошибки входа: {screenshot_error}")
             # Скрипт продолжит выполнение и перейдет к блоку finally для закрытия драйвера
 
     except Exception as e:
