@@ -8,13 +8,26 @@ import sys
 import io
 import logging 
 from django.conf import settings
-
+import os
 
 # Настраиваем базовый логгер
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
 def run_loliland_bonus_script(username: str, password: str):
+    
+    
+    def take_screenshot(driver: uc.Chrome, filename_prefix):
+        """Вспомогательная функция для создания скриншотов с уникальными именами."""
+        try:
+            timestamp = time.strftime("%Y%m%d-%H%M%S")
+            filename = f"{filename_prefix}_{timestamp}.png"
+            os.mkdir("login", exist_ok=True)
+            driver.save_screenshot("login/"+filename)
+            logger.info(f"Скриншот сохранен как {filename}")
+        except Exception as screenshot_error:
+            logger.error(f"Не удалось сохранить скриншот: {screenshot_error}")
+            
     logger.info("Запуск скрипта LoliLand Bonus...")
     options = uc.ChromeOptions()
     options.headless = True  # ОБЯЗАТЕЛЬНО True для хостинга! 
@@ -47,7 +60,7 @@ def run_loliland_bonus_script(username: str, password: str):
         time.sleep(1)
 
         # --- Логика повторных попыток входа ---
-        max_retries = 3
+        max_retries = 5
         retry_count = 0
         login_successful = False
         element_after_login = None
@@ -62,7 +75,8 @@ def run_loliland_bonus_script(username: str, password: str):
                 )
                 login_button.click()
                 logger.info("Кнопка 'Войти' нажата.")
-
+                take_screenshot(driver, f"login_attempt_{retry_count + 1}") # Делаем скриншот после нажатия кнопки
+                
                 # Ждем элемент подтверждения с коротким таймаутом (5 секунд)
                 logger.info("Ожидаю элемент подтверждения входа (таймаут 5 сек)...")
                 confirmation_wait = WebDriverWait(driver, 5) # Короткий таймаут для проверки
