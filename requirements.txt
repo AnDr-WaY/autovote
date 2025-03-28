@@ -1,0 +1,6 @@
+django
+django-jazzmin
+setuptools
+selenium 
+undetected-chromedriver
+2captcha-python
