@@ -10,12 +10,15 @@ import io
 import logging 
 from django.conf import settings
 import os
+from twocaptcha import TwoCaptcha
 
 # Настраиваем базовый логгер
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
+SITEKEY_RECAPTCHA_V3 = '6LfvJbwUAAAAAOU7JtORR4YJGvqHJpacrSZ6H9hU' # Sitekey для reCAPTCHA v3 с сайта
+RECAPTCHA_URL = 'https://loliland.ru/'
 
-def run_loliland_bonus_script(username: str, password: str):
+def run_loliland_bonus_script(username: str, password: str, cptchaapikey: str):
     
     
     def take_screenshot(driver: uc.Chrome, filename_prefix):
@@ -29,6 +32,22 @@ def run_loliland_bonus_script(username: str, password: str):
         except Exception as screenshot_error:
             logger.error(f"Не удалось сохранить скриншот: {screenshot_error}")
             
+            
+            
+    def solve_recaptcha_v3(driver, sitekey, page_url, cptchaapikey):
+        """Решает reCAPTCHA v3 с помощью сервиса 2Captcha."""
+        logger.info("Обнаружена reCAPTCHA v3. Попытка решения через 2Captcha...")
+        try:
+            solver = TwoCaptcha(cptchaapikey)
+            result = solver.recaptcha(sitekey=sitekey, url=page_url, version='v3', action='login') # action='login' - пример, уточните action если нужно
+            captcha_response = result['code']
+            logger.info("ReCAPTCHA v3 успешно решена через 2Captcha.")
+            return captcha_response
+        except Exception as e:
+            logger.error(f"Ошибка при решении reCAPTCHA v3 через 2Captcha: {e}")
+            return None
+        
+        
     logger.info("Запуск скрипта LoliLand Bonus...")
     options = uc.ChromeOptions()
     options.headless = True  # ОБЯЗАТЕЛЬНО True для хостинга! 
@@ -41,7 +60,6 @@ def run_loliland_bonus_script(username: str, password: str):
     
     options.add_argument("--disable-blink-features=AutomationControlled")
     options.add_argument("--lang=ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7")
-
     driver = None # Инициализируем driver как None
     try:
         # Используйте uc.find_chrome_executable() если chromedriver не в PATH
@@ -66,6 +84,29 @@ def run_loliland_bonus_script(username: str, password: str):
         actions.move_to_element(password_field)
         password_field.send_keys(password) 
         time.sleep(3)
+
+
+        # --- Попытка решения reCAPTCHA v3 перед вводом данных ---
+        logger.info("Проверяю наличие reCAPTCHA v3...")
+        try:
+            # Попытка найти элемент, который может указывать на наличие reCAPTCHA v3.
+            # reCAPTCHA v3 часто не имеет видимого элемента, но можно попробовать найти что-то характерное,
+            # или просто всегда пытаться решить капчу и смотреть на результат.
+            # В данном примере, просто предполагаем, что reCAPTCHA v3 есть и пытаемся решить.
+            recaptcha_response = solve_recaptcha_v3(driver, SITEKEY_RECAPTCHA_V3, RECAPTCHA_URL, cptchaapikey)
+            if recaptcha_response:
+                # reCAPTCHA v3 token получен, но для v3 обычно не нужно его явно вставлять.
+                # Токен должен быть автоматически отправлен при взаимодействии с формой или при отправке формы.
+                logger.info("Токен reCAPTCHA v3 получен. Предполагается автоматическая отправка токена.")
+                # Если нужно явно вставить токен (что для v3 обычно не требуется), код для вставки токена здесь.
+                # Например, если нужно вставить в скрытое поле:
+                # driver.execute_script(f"document.getElementById('g-recaptcha-response').value='{recaptcha_response}';")
+            else:
+                logger.warning("Не удалось решить reCAPTCHA v3 через 2Captcha. Возможно, продолжение без решения.")
+        except Exception as e_captcha_check:
+            logger.error(f"Ошибка при проверке или решении reCAPTCHA v3: {e_captcha_check}")
+        # --- Конец блока решения reCAPTCHA v3 ---
+
 
         # --- Логика повторных попыток входа ---
         max_retries = 3
@@ -191,4 +232,4 @@ def run_loliland_bonus_script(username: str, password: str):
         
 if __name__ == "__main__":
     import accauntdata
-    run_loliland_bonus_script(accauntdata.user, accauntdata.password)
+    run_loliland_bonus_script(accauntdata.user, accauntdata.password, accauntdata.CAPTHCAAPI)
