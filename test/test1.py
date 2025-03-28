@@ -78,18 +78,19 @@ def run_loliland_bonus_script(username: str, password: str):
                 logger.info(f"Попытка входа #{retry_count + 1}...")
                 # Находим кнопку перед каждым кликом (на случай, если элемент устарел)
                 login_button_xpath = "//div[@class='btn-drop' and contains(normalize-space(), 'Войти')]"
-                login_button = WebDriverWait(driver, 10).until(
+                login_button = WebDriverWait(driver, 5).until(
                     EC.element_to_be_clickable((By.XPATH, login_button_xpath))
                 )
-                actions.move_to_element(login_button)
-                actions.click(login_button)
+                if retry_count == 0:
+                    actions.move_to_element(login_button)
+                login_button.click()
                 logger.info("Кнопка 'Войти' нажата.")
                 time.sleep(1)
                 take_screenshot(driver, f"login_attempt_{retry_count + 1}") # Делаем скриншот после нажатия кнопки
                 
-                # Ждем элемент подтверждения с коротким таймаутом (5 секунд)
-                logger.info("Ожидаю элемент подтверждения входа (таймаут 5 сек)...")
-                confirmation_wait = WebDriverWait(driver, 5) # Короткий таймаут для проверки
+                # Ждем элемент подтверждения с коротким таймаутом 2 секунды)
+                logger.info(f"Ожидаю элемент подтверждения входа (таймаут 2 сек)...")
+                confirmation_wait = WebDriverWait(driver, 2) # Короткий таймаут для проверки
                 element_after_login = confirmation_wait.until(
                     EC.presence_of_element_located((By.XPATH, "//*[contains(text(), 'AnDr_WaY')]")) # Ваш селектор подтверждения
                 )
@@ -97,11 +98,11 @@ def run_loliland_bonus_script(username: str, password: str):
                 login_successful = True # Успех, выходим из цикла
 
             except TimeoutException:
-                logger.warning(f"Элемент подтверждения не найден за 5 секунд после попытки #{retry_count + 1}.")
+                logger.warning(f"Элемент подтверждения не найден за несколько секунд после попытки #{retry_count + 1}.")
                 retry_count += 1
                 if retry_count <= max_retries:
-                    logger.info(f"Повторная попытка через 5 секунд... (Осталось {max_retries - retry_count + 1})")
-                    time.sleep(5) # Пауза перед следующей попыткой
+                    logger.info(f"Повторная попытка через retry_count+1 секунд... (Осталось {max_retries - retry_count + 1})")
+                    time.sleep(retry_count+1) # Пауза перед следующей попыткой
                 else:
                     logger.error("Достигнуто максимальное количество попыток входа. Вход не удался.")
                     # Выходим из цикла после последней неудачной попытки
@@ -189,4 +190,5 @@ def run_loliland_bonus_script(username: str, password: str):
         logger.info("Скрипт LoliLand Bonus завершен.")
         
 if __name__ == "__main__":
-    run_loliland_bonus_script("AnDr_WaY", '')
+    import accauntdata
+    run_loliland_bonus_script(accauntdata.user, accauntdata.password)
