@@ -22,7 +22,7 @@ def run_loliland_bonus_script(username: str, password: str):
         try:
             timestamp = time.strftime("%Y%m%d-%H%M%S")
             filename = f"{filename_prefix}_{timestamp}.png"
-            os.mkdir("login", exist_ok=True)
+            os.makedirs("login", exist_ok=True)
             driver.save_screenshot("login/"+filename)
             logger.info(f"Скриншот сохранен как {filename}")
         except Exception as screenshot_error:
@@ -37,6 +37,9 @@ def run_loliland_bonus_script(username: str, password: str):
     options.add_argument('--disable-dev-shm-usage')
     options.add_argument('--disable-gpu')
     options.add_argument('--window-size=1920x1080') # Иногда помогает
+    
+    options.add_argument("--disable-blink-features=AutomationControlled")
+    options.add_argument("--lang=ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7")
 
     driver = None # Инициализируем driver как None
     try:
@@ -75,6 +78,7 @@ def run_loliland_bonus_script(username: str, password: str):
                 )
                 login_button.click()
                 logger.info("Кнопка 'Войти' нажата.")
+                time.sleep(1)
                 take_screenshot(driver, f"login_attempt_{retry_count + 1}") # Делаем скриншот после нажатия кнопки
                 
                 # Ждем элемент подтверждения с коротким таймаутом (5 секунд)
@@ -109,7 +113,7 @@ def run_loliland_bonus_script(username: str, password: str):
                     break # Выходим из цикла
         # --- Конец логики повторных попыток ---
         
-        time.sleep(11)
+        time.sleep(2)
         # --- Действия после входа (выполняются только если login_successful == True) ---
         if login_successful and element_after_login:
             logger.info("Вход успешно подтвержден.")
