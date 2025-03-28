@@ -39,7 +39,7 @@ def run_loliland_bonus_script(username: str, password: str, cptchaapikey: str):
         logger.info("Обнаружена reCAPTCHA v3. Попытка решения через 2Captcha...")
         try:
             solver = TwoCaptcha(cptchaapikey)
-            result = solver.recaptcha(sitekey=sitekey, url=page_url, version='v3', minScore=0.9) # action='login' - пример, уточните action если нужно
+            result = solver.recaptcha(sitekey=sitekey, url=page_url, version='v3', minScore=0.5) # action='login' - пример, уточните action если нужно
             captcha_response = result['code']
             logger.info(captcha_response)
             
