@@ -100,7 +100,7 @@ def run_loliland_bonus_script(username: str, password: str, cptchaapikey: str):
                 logger.info("Токен reCAPTCHA v3 получен. Предполагается автоматическая отправка токена.")
                 # Если нужно явно вставить токен (что для v3 обычно не требуется), код для вставки токена здесь.
                 # Например, если нужно вставить в скрытое поле:
-                # driver.execute_script(f"document.getElementById('g-recaptcha-response').value='{recaptcha_response}';")
+                driver.execute_script(f"document.getElementById('g-recaptcha-response').value='{recaptcha_response}';")
             else:
                 logger.warning("Не удалось решить reCAPTCHA v3 через 2Captcha. Возможно, продолжение без решения.")
         except Exception as e_captcha_check:
