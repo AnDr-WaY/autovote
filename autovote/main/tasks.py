@@ -28,8 +28,8 @@ def run_loliland_bonus_script(username: str, password: str):
     driver = None # Инициализируем driver как None
     try:
         # Используйте uc.find_chrome_executable() если chromedriver не в PATH
-        # driver = uc.Chrome(options=options, driver_executable_path='/path/to/your/chromedriver')
-        driver = uc.Chrome(options=options)
+        driver = uc.Chrome(options=options, driver_executable_path=uc.find_chrome_executable())
+        # driver = uc.Chrome(options=options)
         logger.info("Драйвер запущен.")
 
         logger.info("Получаю страницу loliland.ru (eager strategy)")
