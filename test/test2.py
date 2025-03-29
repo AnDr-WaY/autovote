@@ -39,7 +39,7 @@ def run_loliland_bonus_script(username: str, password: str, cptchaapikey: str):
         
     logger.info("Запуск скрипта LoliLand Bonus...")
     options = uc.ChromeOptions()
-    # options.headless = True  # ОБЯЗАТЕЛЬНО True для хостинга! 
+    options.headless = True  # ОБЯЗАТЕЛЬНО True для хостинга! 
     options.page_load_strategy = 'eager'
     # Дополнительные опции для работы в Linux/Docker на хостинге:
     options.add_argument('--no-sandbox')
