@@ -77,7 +77,7 @@ def run_loliland_bonus_script(username: str, password: str, cptchaapikey: str):
         try:
             
             solver = TwoCaptcha(cptchaapikey)
-            recaptcha_response = solver.recaptcha(sitekey=SITEKEY_RECAPTCHA_V3, url=RECAPTCHA_URL, version='V3', minscore=0.9)
+            recaptcha_response = solver.recaptcha(sitekey=SITEKEY_RECAPTCHA_V3, url=RECAPTCHA_URL, version='V3', minscore=0.9, action='login')
             if recaptcha_response:
                 
                 logger.info("Токен reCAPTCHA v3 получен. Предполагается автоматическая отправка токена.")
